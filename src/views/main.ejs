@@ -1,19 +1,25 @@
 <% layout('layout') -%>
 
 <script type="text/javascript">
-
+    
+    var data = new FormData();
     var folderList;
     var fileList;
     var curIndex=0;
-    $(function(){
 
-      $("#tab1").show();
+    $(function(){
+      $("#doc").fadeIn();
+      $("#tab1").hide();
       $("#tab2").hide();
 
     });
-
+    function goTab1(){
+        $("#doc").fadeOut();
+        $("#tab1").fadeIn();
+        $("#tab2").hide();
+    }
     //분류 시작하기
-    function goAct(){
+    function goTab2(){
         var fList = gfnCheckNull( $("#folderList").val() ).split('\n');
         //공백제거
         fList = fList.map(function(data){
@@ -44,12 +50,12 @@
 
         folderList = uniqueArr ;
         
-
-        $("#tab1").hide();
-        $("#tab2").show();
+        
+        $("#tab1").fadeOut();
+        $("#tab2").fadeIn();
 
         setCheckBox();
-        setThumbnail()
+        setThumbnailCbkBox()
     };
 
     //다음 사진으로
@@ -57,11 +63,11 @@
         //값 셋팅
         getSetting();
         fileLen = document.getElementById("uploadFile").files.length
+
         if( curIndex >= fileLen ){
             goSave();
         }else{
-            setCheckBox();
-            setThumbnail()
+            setThumbnailCbkBox()
         };
     };
     // 체크된 폴더명 저장하기
@@ -71,12 +77,11 @@
         for( var i=0 ;  i<$(".fBox:checked").length ; i++){
             chk.push( $(".fBox:checked").eq(i).val() );
         };
-        str = '<input type="hidden" name="chkList" value="'+chk+'"/>';
-        $("#tab1").append(str);
-        
+        data.append('chkList', chk  );
     };
-    // 이미지 미리보기
-    function setThumbnail() {
+    // 이미지 미리보기 , 체크박스 선택 해제
+    function setThumbnailCbkBox() {
+        $("#image_container").hide();
         index = curIndex;
         var reader = new FileReader();
         reader.onload = function(event) {
@@ -86,9 +91,11 @@
             document.querySelector("#image_container").appendChild(img); 
             }; 
         $("#image_container").html("");
-        
+        data.append('file', document.getElementById("uploadFile").files[curIndex] );
         reader.readAsDataURL( document.getElementById("uploadFile").files[curIndex] ); 
         curIndex++;
+        $("#image_container").fadeIn();
+        gfnToggleMultiChk(false,"fBox");
     };
 
     //체크박스 셋팅
@@ -102,32 +109,40 @@
 
     //파일 셋팅하기
     function goSave(){
-        var frm = document.uploadForm;
-        frm.submit();
-        /*
+        startDownBlockUi();
         $.ajax({
             url: '/uploadFile',
             method: 'post',
-            data:$("#uploadForm").serialize(),
+            data:data,
             dataType: 'json',
-            enctype: 'multipart/form-data',
             processData: false,
             contentType: false,
             success: function(res) {
+                stopBluckUi();
                 if(res.result == true){
                     alert("등록되었습니다.");
                     location.reload();
                 };
             }
         });
-        */
+        
 
     };
     
 </script>
 
-<form name="uploadForm" id="uploadForm" action="/uploadFile" enctype="multipart/form-data" method="post">
+<div id="doc" class="row">
+    <h2> 사진분류 방법</h2>
+    <span>1. 파일첨부 (다중 선택 가능)</span><br/>
+    <span>2. 폴더 리스트를 입력 (구분자는 enter Key)</span><br/>
+    <span>3. 사진 분류 화면으로 이동</span><br/>
+    <span>4. 해당 이미지 확인후 저장할 폴더 선택(폴더 다중 선택 가능)</span><br/>
 
+    
+    <div class="fr MgB10">
+        <button type="button" class="btn btn-primary" onclick="goTab1();return false;">다음</button>
+    </div>
+</div>
 <div id="tab1" class="row">
 
     
@@ -144,7 +159,7 @@
             </td>
         </tr>
         <tr>
-            <th>폴더 리스트 <br/>% 구분자 = 엔터 </th>
+            <th>폴더 리스트</th>
             <td>
                 <textarea id="folderList" name="folderList" class="W100p form-control" rows="20" cols="35" maxlength="6000"></textarea>
             </td>
@@ -153,11 +168,11 @@
     </table>
     
     <div class="fr MgB10">
-        <button type="button" class="btn btn-primary" onclick="goAct();return false;">분류 시작하기</button>
+        <button type="button" class="btn btn-primary" onclick="goTab2();return false;">다음</button>
     </div>
 
 </div>
-</form>
+
 <div id="tab2" class="row">
 
     <table id="showTable" class="table W100p H95p" >
@@ -182,6 +197,6 @@
 
 <style>
     .flabel{
-        font-size: 2em;
+        font-size: 1.5em;
     }
 </style>

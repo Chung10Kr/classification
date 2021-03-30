@@ -30,6 +30,7 @@ var uploadFile = async function (req, res) {
   var filepPaths = [];
   var filenames = [];
   form.on('part',function(part){
+    
       var filename;
       var size;
       
@@ -69,7 +70,7 @@ var uploadFile = async function (req, res) {
   
   // all uploads are completed
   form.on('close',function(){
-      
+
       for( var i=0 ; i < filepPaths.length ; i++ ){
         
         input = fs.createReadStream( filepPaths[i] );
@@ -93,7 +94,7 @@ var uploadFile = async function (req, res) {
         };
 
       };
-      res.redirect("/result")
+      res.status(200).send({"result" : true });
   });
 
   // track progress

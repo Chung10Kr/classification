@@ -3,6 +3,7 @@ var express = require('express')
   , http = require('http')
   , path = require('path');
 
+  
 // Express의 미들웨어 불러오기
 var bodyParser = require('body-parser')
   , cookieParser = require('cookie-parser')
@@ -11,6 +12,7 @@ var bodyParser = require('body-parser')
 
 // 에러 핸들러 모듈 사용
 var expressErrorHandler = require('express-error-handler');
+var open = require('open');
 
 // Session 미들웨어 불러오기
 var expressSession = require('express-session');
@@ -114,4 +116,5 @@ app.on('close', function () {
 // 시작된 서버 객체를 리턴받도록 합니다.
 var server = http.createServer(app).listen(app.get('port'), function(){
 	console.log('서버가 시작되었습니다. 포트 : ' + app.get('port'));
+  open(`http://127.0.0.1:${app.get('port')}`);
 });
