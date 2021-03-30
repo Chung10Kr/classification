@@ -1,0 +1,187 @@
+<% layout('layout') -%>
+
+<script type="text/javascript">
+
+    var folderList;
+    var fileList;
+    var curIndex=0;
+    $(function(){
+
+      $("#tab1").show();
+      $("#tab2").hide();
+
+    });
+
+    //분류 시작하기
+    function goAct(){
+        var fList = gfnCheckNull( $("#folderList").val() ).split('\n');
+        //공백제거
+        fList = fList.map(function(data){
+             return data.trim();
+        });
+        //빈칸제거
+        fList = fList.filter(function(data){
+            if( gfnCheckNull(data) != ""){
+                return gfnCheckNull(data);
+            };
+        });
+        //중복제거
+        const set = new Set(fList);
+        const uniqueArr = [...set];
+        
+
+        uploadData = gfnCheckNull( document.getElementById("uploadFile").value );
+        
+        if( uploadData == '' ){
+            alert("파일을 업로드 해주세요.")
+            return false;
+        };
+
+        if( uniqueArr.length == 0 ){
+            alert("폴더명을 지정해주세요.");
+            return false;
+        };
+
+        folderList = uniqueArr ;
+        
+
+        $("#tab1").hide();
+        $("#tab2").show();
+
+        setCheckBox();
+        setThumbnail()
+    };
+
+    //다음 사진으로
+    function goNxt(){
+        //값 셋팅
+        getSetting();
+        fileLen = document.getElementById("uploadFile").files.length
+        if( curIndex >= fileLen ){
+            goSave();
+        }else{
+            setCheckBox();
+            setThumbnail()
+        };
+    };
+    // 체크된 폴더명 저장하기
+    function getSetting(){
+        chk = [];
+        var chkF = $(".fBox:checked");
+        for( var i=0 ;  i<$(".fBox:checked").length ; i++){
+            chk.push( $(".fBox:checked").eq(i).val() );
+        };
+        str = '<input type="hidden" name="chkList" value="'+chk+'"/>';
+        $("#tab1").append(str);
+        
+    };
+    // 이미지 미리보기
+    function setThumbnail() {
+        index = curIndex;
+        var reader = new FileReader();
+        reader.onload = function(event) {
+            var img = document.createElement("img");
+            img.setAttribute("src", event.target.result);
+            img.setAttribute("class","W95p H95p"); 
+            document.querySelector("#image_container").appendChild(img); 
+            }; 
+        $("#image_container").html("");
+        
+        reader.readAsDataURL( document.getElementById("uploadFile").files[curIndex] ); 
+        curIndex++;
+    };
+
+    //체크박스 셋팅
+    function setCheckBox(){
+        var str = '';
+        for( var i=0 ; i<folderList.length ; i++ ){
+            str+='<label class="flabel"><input type="checkbox" class="fBox" name="fBox" value="'+folderList[i]+'" >'+folderList[i]+'</label> <br/>';
+        };
+        $("#CheckBoxList").html(str);
+    };
+
+    //파일 셋팅하기
+    function goSave(){
+        var frm = document.uploadForm;
+        frm.submit();
+        /*
+        $.ajax({
+            url: '/uploadFile',
+            method: 'post',
+            data:$("#uploadForm").serialize(),
+            dataType: 'json',
+            enctype: 'multipart/form-data',
+            processData: false,
+            contentType: false,
+            success: function(res) {
+                if(res.result == true){
+                    alert("등록되었습니다.");
+                    location.reload();
+                };
+            }
+        });
+        */
+
+    };
+    
+</script>
+
+<form name="uploadForm" id="uploadForm" action="/uploadFile" enctype="multipart/form-data" method="post">
+
+<div id="tab1" class="row">
+
+    
+    <table id="inputTable" class="table" >
+        <colgroup>
+        <col style="width: 20%;">
+        <col/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th>파일첨부</th>
+            <td>
+                <input type="file" name="uploadFile" id="uploadFile" multiple="multiple">
+            </td>
+        </tr>
+        <tr>
+            <th>폴더 리스트 <br/>% 구분자 = 엔터 </th>
+            <td>
+                <textarea id="folderList" name="folderList" class="W100p form-control" rows="20" cols="35" maxlength="6000"></textarea>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    
+    <div class="fr MgB10">
+        <button type="button" class="btn btn-primary" onclick="goAct();return false;">분류 시작하기</button>
+    </div>
+
+</div>
+</form>
+<div id="tab2" class="row">
+
+    <table id="showTable" class="table W100p H95p" >
+        <colgroup>
+        <col style="width: 80%;">
+        <col/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th id="image_container"></th>
+            <td id="CheckBoxList" style="text-align: center;"></td>
+        </tr>
+        </tbody>
+    </table>
+    
+    <div class="fr MgB10">
+        <button type="button" class="btn btn-primary" onclick="goNxt();return false;">저장</button>
+    </div>
+
+</div>
+
+
+<style>
+    .flabel{
+        font-size: 2em;
+    }
+</style>
