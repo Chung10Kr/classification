@@ -11,8 +11,8 @@ var moment = require('moment');
 const desktopPath = path.join(os.homedir(), 'desktop');
 
 var uploadFile = async function (req, res) {
-  const folderNm2 = moment().format("YYYYMMDDHHMMSS");  
-  const folderNm = moment().format("YYYYMMDD");  
+  const folderNm = moment().format("YYYYMMDDHHMMSS");  
+  const folderNm2 = moment().format("YYYYMMDD");  
   var returnPath='';
   
   var form = new multiparty.Form();
