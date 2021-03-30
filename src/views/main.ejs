@@ -32,9 +32,9 @@
             };
         });
         //중복제거
-        const set = new Set(fList);
-        const uniqueArr = [...set];
-        
+        const uniqueArr = fList.filter(function(element, index){
+            return fList.indexOf(element) === index;
+        });
 
         uploadData = gfnCheckNull( document.getElementById("uploadFile").value );
         
